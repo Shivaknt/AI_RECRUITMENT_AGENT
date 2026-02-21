@@ -1,17 +1,17 @@
 # ── Web framework ───────────────────────────────────────────────
-#flask
+flask
 
 # ── LLM (Gemini) ────────────────────────────────────────────────
-google-genai          # new unified SDK (replaces google-generativeai)
+google-genai     
 
 # ── Local Embeddings (100% free, no API needed) ──────────────────
-#sentence-transformers       # pulls in torch + transformers automatically
+sentence-transformers       # pulls in torch + transformers automatically
 
 # ── Vector Database (local, persistent) ─────────────────────────
-#chromadb
+chromadb
 
 # ── PDF text extraction ──────────────────────────────────────────
-#PyPDF2
+PyPDF2
 
 # ── Environment variables ────────────────────────────────────────
-#python-dotenv
+python-dotenv
