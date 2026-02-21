@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RecruitAI — Intelligent Hiring Suite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;900&family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #080d1a;
+      --ink2:      #0d1428;
+      --ink3:      #121b35;
+      --glass:     rgba(255,255,255,0.04);
+      --glass2:    rgba(255,255,255,0.08);
+      --border:    rgba(0,212,255,0.12);
+      --border2:   rgba(0,212,255,0.22);
+      --gold:      #00d4ff;
+      --gold2:     #38bdf8;
+      --gold3:     #7dd3fc;
+      --golddim:   rgba(0,212,255,0.1);
+      --goldbright:rgba(0,212,255,0.28);
+      --text:      #e8f4fd;
+      --text2:     #94b8d4;
+      --text3:     #445d78;
+      --green:     #10e8a0;
+      --greendim:  rgba(16,232,160,0.1);
+      --amber:     #fbbf24;
+      --amberdim:  rgba(251,191,36,0.1);
+      --red:       #ff6b8a;
+      --reddim:    rgba(255,107,138,0.1);
+      --r:         14px;
+      --cyan:      #00d4ff;
+      --violet:    #a855f7;
+      --pink:      #ec4899;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #080d1a;
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════════
+       CANVAS BACKGROUND
+    ═══════════════════════════════════════════ */
+    #bg-canvas {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      opacity: 0.4;
+    }
+
+    .page-wrap { position: relative; z-index: 1; }
+
+    /* ═══════════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════════ */
+    .header {
+      padding: 64px 32px 52px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,212,255,0.18) 0%, rgba(168,85,247,0.1) 40%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      border: 1px solid var(--border2);
+      border-radius: 2px;
+      padding: 6px 18px;
+      margin-bottom: 28px;
+      background: var(--glass);
+      backdrop-filter: blur(8px);
+      animation: fadeUp 0.8s ease both;
+    }
+    .eyebrow-line {
+      width: 20px; height: 1px; background: var(--gold);
+    }
+    .eyebrow span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--gold);
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: clamp(42px, 7vw, 88px);
+      line-height: 0.95;
+      letter-spacing: -2px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+    .hero-title .word-ai {
+      display: block;
+      background: linear-gradient(135deg, #00d4ff 0%, #a855f7 45%, #ec4899 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-title .word-recruit {
+      display: block; color: var(--text);
+    }
+    .hero-title .word-agent {
+      display: block; color: var(--text3);
+      font-style: italic; font-weight: 400;
+      font-size: 0.55em; letter-spacing: 4px;
+      -webkit-text-fill-color: var(--text3);
+      margin-top: 8px;
+    }
+
+    .hero-sub {
+      font-size: 15px; color: var(--text2); font-weight: 300;
+      letter-spacing: 0.5px; margin-bottom: 44px;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+      max-width: 460px; margin: 0 auto;
+      position: relative;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+    .upload-box {
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      padding: 22px 24px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 18px;
+      background: var(--glass);
+      backdrop-filter: blur(16px);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative; overflow: hidden;
+    }
+    .upload-box::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,212,255,0.08) 0%, rgba(168,85,247,0.05) 60%, transparent 100%);
+      opacity: 0; transition: opacity 0.35s;
+    }
+    .upload-box:hover { border-color: var(--goldbright); transform: translateY(-2px); }
+    .upload-box:hover::before { opacity: 1; }
+    .upload-box.loaded { border-color: rgba(16,232,160,0.45); }
+    .upload-box.loaded::before {
+      background: linear-gradient(135deg, rgba(16,232,160,0.07) 0%, transparent 60%);
+      opacity: 1;
+    }
+
+    .upload-icon-wrap {
+      width: 48px; height: 48px; flex-shrink: 0;
+      border-radius: 10px; background: var(--glass2);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; transition: all 0.35s;
+    }
+    .upload-box:hover .upload-icon-wrap { background: var(--golddim); border-color: var(--goldbright); }
+    .upload-box.loaded .upload-icon-wrap { background: var(--greendim); border-color: rgba(16,232,160,0.45); }
+
+    .upload-text { flex: 1; text-align: left; }
+    .upload-name { font-size: 14px; font-weight: 500; color: var(--text2); transition: color 0.3s; }
+    .upload-box.loaded .upload-name { color: var(--green); }
+    .upload-hint { font-size: 11px; color: var(--text3); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+
+    .upload-cta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; letter-spacing: 1px;
+      color: var(--gold); border: 1px solid var(--golddim);
+      padding: 6px 14px; border-radius: 4px;
+      white-space: nowrap; transition: all 0.3s;
+    }
+    .upload-box:hover .upload-cta { background: var(--golddim); }
+    .upload-box.loaded .upload-cta { display: none; }
+
+    /* Progress bar for upload */
+    .upload-progress {
+      height: 2px; background: var(--border); border-radius: 2px;
+      margin-top: 12px; overflow: hidden; display: none;
+    }
+    .upload-progress.active { display: block; }
+    .upload-progress-bar {
+      height: 100%; width: 0%; border-radius: 2px;
+      background: linear-gradient(90deg, #00d4ff, #a855f7, #ec4899);
+      transition: width 0.4s ease;
+    }
+
+    /* ═══════════════════════════════════════════
+       NAVIGATION TABS
+    ═══════════════════════════════════════════ */
+    .nav-wrap {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(24px) saturate(180%);
+      background: rgba(8,13,26,0.82);
+      border-bottom: 1px solid rgba(0,212,255,0.1);
+    }
+    .nav-inner {
+      max-width: 940px; margin: 0 auto;
+      display: flex; overflow-x: auto;
+      padding: 0 12px;
+    }
+    .nav-inner::-webkit-scrollbar { display: none; }
+
+    .nav-tab {
+      flex: 1; min-width: 130px;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      padding: 18px 12px 16px;
+      background: transparent; border: none;
+      cursor: pointer; position: relative;
+      transition: all 0.3s;
+      font-family: 'Outfit', sans-serif;
+    }
+    .nav-tab::after {
+      content: '';
+      position: absolute; bottom: 0; left: 16px; right: 16px; height: 2px;
+      background: var(--gold);
+      transform: scaleX(0); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      border-radius: 2px 2px 0 0;
+    }
+    .nav-tab:hover::after { transform: scaleX(0.5); }
+    .nav-tab.active::after { transform: scaleX(1); }
+
+    .nav-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: var(--text3); letter-spacing: 1px;
+      transition: color 0.3s;
+    }
+    .nav-tab.active .nav-num { color: var(--gold); }
+
+    .nav-icon {
+      font-size: 20px; transition: transform 0.3s;
+      filter: grayscale(1) opacity(0.5);
+      transition: all 0.3s;
+    }
+    .nav-tab:hover .nav-icon { filter: grayscale(0) opacity(0.8); transform: scale(1.1); }
+    .nav-tab.active .nav-icon { filter: grayscale(0) opacity(1); transform: scale(1.15); }
+
+    .nav-label {
+      font-size: 11px; font-weight: 500;
+      color: var(--text3); text-align: center;
+      line-height: 1.3; letter-spacing: 0.3px;
+      transition: color 0.3s;
+    }
+    .nav-tab:hover .nav-label { color: var(--text2); }
+    .nav-tab.active .nav-label { color: var(--gold2); font-weight: 600; }
+
+    /* ═══════════════════════════════════════════
+       PANEL
+    ═══════════════════════════════════════════ */
+    .panel {
+      max-width: 940px; margin: 0 auto;
+      padding: 48px 32px 80px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 80px 20px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .empty-state .e-icon {
+      font-size: 56px; margin-bottom: 20px;
+      filter: grayscale(1) opacity(0.3);
+    }
+    .empty-state h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; color: var(--text3);
+      font-weight: 400; margin-bottom: 8px;
+    }
+    .empty-state p { font-size: 13px; color: var(--text3); }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; animation: sectionReveal 0.45s cubic-bezier(0.4,0,0.2,1) both; }
+
+    /* Section header */
+    .sec-head {
+      display: flex; align-items: flex-start; gap: 20px;
+      margin-bottom: 40px; padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sec-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 72px; font-weight: 900; line-height: 0.85;
+      color: rgba(0,212,255,0.08); flex-shrink: 0;
+      letter-spacing: -3px; user-select: none;
+    }
+    .sec-head-text { padding-top: 4px; }
+    .sec-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px; font-weight: 700;
+      color: var(--text); line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .sec-desc { font-size: 14px; color: var(--text2); font-weight: 300; line-height: 1.6; }
+
+    /* ═══════════════════════════════════════════
+       FORM ELEMENTS
+    ═══════════════════════════════════════════ */
+    .form-grid { display: grid; gap: 20px; }
+    .form-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .field { display: flex; flex-direction: column; gap: 8px; }
+
+    .field-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--text3);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .field-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .field input[type=text],
+    .field select,
+    .field textarea {
+      width: 100%;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 13px 16px;
+      font-size: 14px;
+      font-family: 'Outfit', sans-serif;
+      outline: none; resize: vertical;
+      transition: all 0.25s;
+      backdrop-filter: blur(8px);
+    }
+    .field input[type=text]:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--gold);
+      background: rgba(0,212,255,0.04);
+      box-shadow: 0 0 0 3px rgba(0,212,255,0.1), 0 0 20px rgba(0,212,255,0.08);
+    }
+    .field input[type=text] { height: 48px; }
+    .field select { height: 48px; cursor: pointer; }
+    .field select option { background: #0d1428; }
+    .field textarea { min-height: 110px; }
+
+    /* Checkbox */
+    .check-row {
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer; padding: 14px 16px;
+      border: 1px solid var(--border); border-radius: 8px;
+      background: var(--glass); transition: all 0.25s;
+    }
+    .check-row:hover { border-color: var(--border2); background: var(--glass2); }
+    .check-box {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: 1px solid var(--border2); border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; background: transparent;
+    }
+    .check-row.checked .check-box {
+      background: linear-gradient(135deg, #00d4ff, #a855f7); border-color: #00d4ff;
+    }
+    .check-row.checked .check-box::after {
+      content: '✓'; font-size: 11px; color: #080d1a; font-weight: 800;
+    }
+    .check-label {
+      font-size: 13px; color: var(--text2); font-weight: 400;
+    }
+    .check-row.checked .check-label { color: var(--text); }
+
+    .jd-field { margin-top: 12px; display: none; }
+    .jd-field.visible { display: block; animation: fadeUp 0.3s ease; }
+
+    /* Slider */
+    .slider-wrap { display: grid; gap: 10px; }
+    .slider-top { display: flex; justify-content: space-between; align-items: center; }
+    .slider-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3);
+    }
+    .slider-count {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; font-weight: 700; color: var(--gold);
+      line-height: 1;
+    }
+    .slider-unit { font-size: 11px; color: var(--text3); margin-left: 2px; }
+
+    input[type=range] {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 2px;
+      background: rgba(0,212,255,0.15); border-radius: 2px; cursor: pointer; outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: linear-gradient(135deg, #00d4ff, #a855f7);
+      border: 2px solid rgba(255,255,255,0.3);
+      box-shadow: 0 0 12px rgba(0,212,255,0.6), 0 0 24px rgba(168,85,247,0.3);
+      cursor: pointer; transition: all 0.2s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 16px rgba(0,212,255,0.8), 0 0 32px rgba(168,85,247,0.4);
+      transform: scale(1.1);
+    }
+    .slider-track-labels {
+      display: flex; justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: var(--text3); letter-spacing: 1px;
+    }
+
+    /* ═══════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════ */
+    .btn-run {
+      width: 100%; padding: 15px 28px;
+      background: linear-gradient(135deg, #00d4ff 0%, #a855f7 50%, #ec4899 100%);
+      border: none; border-radius: 8px;
+      color: #fff; font-size: 13px; font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .btn-run::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .btn-run:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(0,212,255,0.4), 0 4px 20px rgba(168,85,247,0.3); }
+    .btn-run:hover::before { opacity: 1; }
+    .btn-run:active { transform: translateY(0); }
+    .btn-run:disabled {
+      background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.25);
+      cursor: not-allowed; transform: none; box-shadow: none;
+    }
+
+    .btn-copy {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; margin-top: 14px;
+      background: transparent; border: 1px solid var(--border2);
+      border-radius: 6px; color: var(--text2);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.25s;
+    }
+    .btn-copy:hover { border-color: var(--gold); color: var(--gold); background: var(--golddim); }
+
+    /* ═══════════════════════════════════════════
+       LOADER
+    ═══════════════════════════════════════════ */
+    .loader-wrap {
+      display: none; align-items: center; gap: 14px;
+      padding: 20px 0;
+    }
+    .loader-wrap.active { display: flex; }
+
+    .loader-bars {
+      display: flex; gap: 3px; align-items: flex-end;
+    }
+    .loader-bar {
+      width: 3px; border-radius: 2px;
+      background: linear-gradient(180deg, #00d4ff, #a855f7);
+      animation: barPulse 1s ease-in-out infinite;
+    }
+    .loader-bar:nth-child(1) { height: 12px; animation-delay: 0s; }
+    .loader-bar:nth-child(2) { height: 20px; animation-delay: 0.15s; }
+    .loader-bar:nth-child(3) { height: 16px; animation-delay: 0.3s; }
+    .loader-bar:nth-child(4) { height: 24px; animation-delay: 0.45s; }
+    .loader-bar:nth-child(5) { height: 14px; animation-delay: 0.6s; }
+
+    .loader-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--text3); letter-spacing: 1px;
+    }
+    .loader-text span { color: var(--gold); animation: blink 1.5s infinite; }
+
+    /* ═══════════════════════════════════════════
+       RESULT AREA
+    ═══════════════════════════════════════════ */
+    .result-area { margin-top: 32px; }
+
+    /* Score display */
+    .score-display {
+      display: flex; align-items: center; gap: 32px;
+      padding: 28px 32px;
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: var(--r); margin-bottom: 20px;
+      backdrop-filter: blur(12px);
+      position: relative; overflow: hidden;
+    }
+    .score-display::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    }
+    .score-display.pass::before { background: var(--green); }
+    .score-display.fail::before { background: var(--red); }
+
+    .score-ring-wrap { flex-shrink: 0; position: relative; }
+    .score-svg { transform: rotate(-90deg); }
+    .score-ring-bg { fill: none; stroke: var(--border2); stroke-width: 8; }
+    .score-ring-fill {
+      fill: none; stroke-width: 8; stroke-linecap: round;
+      transition: stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .score-inner {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transform: none;
+    }
+    .score-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px; font-weight: 900; line-height: 1;
+    }
+    .score-denom {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--text3); letter-spacing: 1px;
+    }
+
+    .score-verdict { flex: 1; }
+    .score-verdict-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text3); margin-bottom: 6px;
+    }
+    .score-verdict-msg {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px; font-weight: 600; line-height: 1.3;
+    }
+    .score-display.pass .score-verdict-msg { color: var(--green); }
+    .score-display.fail .score-verdict-msg { color: var(--red); }
+    .score-verdict-sub { font-size: 13px; color: var(--text2); margin-top: 6px; font-weight: 300; }
+
+    /* Insight cards */
+    .insight-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      margin-bottom: 20px;
+    }
+    .insight-card {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: 10px; padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+    .insight-card-head {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .insight-card-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .insight-card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    }
+    .insight-card.strengths .insight-card-dot { background: var(--green); }
+    .insight-card.strengths .insight-card-title { color: var(--green); }
+    .insight-card.gaps .insight-card-dot { background: var(--amber); }
+    .insight-card.gaps .insight-card-title { color: var(--amber); }
+
+    .insight-item {
+      font-size: 13px; color: var(--text2); font-weight: 300;
+      padding: 6px 0 6px 12px;
+      border-left: 2px solid;
+      margin-bottom: 6px; line-height: 1.5;
+    }
+    .insight-card.strengths .insight-item { border-left-color: rgba(16,232,160,0.35); }
+    .insight-card.gaps .insight-item { border-left-color: rgba(251,191,36,0.3); }
+
+    /* Result text box */
+    .result-box {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: 10px; padding: 24px;
+      font-size: 14px; color: var(--text2);
+      line-height: 1.85; font-weight: 300;
+      white-space: pre-wrap; font-family: 'Outfit', sans-serif;
+      position: relative;
+    }
+    .result-box::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, #00d4ff, #a855f7, #ec4899, transparent);
+      border-radius: 10px 10px 0 0;
+    }
+
+    /* Result text formatted (Q&A, questions) */
+    .result-text {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: 10px; padding: 28px;
+      font-size: 14px; color: var(--text2);
+      line-height: 1.9; font-weight: 300;
+      white-space: pre-wrap;
+      position: relative;
+    }
+    .result-text::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, #00d4ff, #a855f7, #ec4899, transparent);
+      border-radius: 10px 10px 0 0;
+    }
+
+    /* Info tip */
+    .info-tip {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px; border-radius: 8px;
+      background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.2);
+      font-size: 13px; color: var(--text2); font-weight: 300;
+    }
+    .info-tip-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+
+    /* Error */
+    .result-error {
+      padding: 18px 20px; border-radius: 8px;
+      background: var(--reddim); border: 1px solid rgba(248,113,113,0.2);
+      font-size: 13px; color: var(--red);
+    }
+
+
+    /* ── GLOSSY CARD EFFECT ── */
+    .upload-box,
+    .insight-card,
+    .score-display,
+    .result-box,
+    .result-text,
+    .check-row {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.06) inset,
+        0 -1px 0 rgba(0,0,0,0.3) inset,
+        0 8px 32px rgba(0,0,0,0.4),
+        0 2px 8px rgba(0,0,0,0.2);
+    }
+    .upload-box:hover {
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.1) inset,
+        0 -1px 0 rgba(0,0,0,0.3) inset,
+        0 12px 48px rgba(0,0,0,0.5),
+        0 0 30px rgba(0,212,255,0.12);
+    }
+    /* Glossy shine sweep on cards */
+    .insight-card::after,
+    .score-display::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg,
+        rgba(255,255,255,0.06) 0%,
+        transparent 40%,
+        transparent 60%,
+        rgba(255,255,255,0.02) 100%);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+    .nav-wrap {
+      box-shadow: 0 1px 0 rgba(0,212,255,0.08), 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    /* ═══════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes sectionReveal {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes barPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
+      50%       { opacity: 1;   transform: scaleY(1); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; } 50% { opacity: 0; }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    .footer {
+      text-align: center; padding: 32px;
+      border-top: 1px solid rgba(0,212,255,0.1);
+      margin-top: 40px;
+    }
+    .footer p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text3);
+    }
+    .footer span { color: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 640px) {
+      .header { padding: 44px 20px 36px; }
+      .panel { padding: 32px 20px 60px; }
+      .form-row2 { grid-template-columns: 1fr; }
+      .insight-grid { grid-template-columns: 1fr; }
+      .score-display { flex-direction: column; text-align: center; }
+      .sec-head { flex-direction: column; gap: 10px; }
+      .sec-num { font-size: 48px; }
+      .hero-title { font-size: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Animated background -->
+<canvas id="bg-canvas"></canvas>
+
+<div class="page-wrap">
+
+  <!-- ══════════════ HEADER ══════════════ -->
+  <header class="header">
+    <div class="eyebrow">
+      <div class="eyebrow-line"></div>
+      <span>AI-Powered · RAG Pipeline · Gemini</span>
+      <div class="eyebrow-line"></div>
+    </div>
+
+    <h1 class="hero-title">
+      <span class="word-recruit">Recruit</span>
+      <span class="word-ai">AI</span>
+      <span class="word-agent">Intelligent Hiring Suite</span>
+    </h1>
+    <p class="hero-sub">Analyze · Interview · Improve · Generate &mdash;  &amp; Gemini</p>
+
+    <!-- Upload -->
+    <div class="upload-zone">
+      <input type="file" id="fileInput" accept=".pdf,.txt" hidden onchange="handleFile(event)"/>
+      <div class="upload-box" id="uploadBox" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon-wrap" id="uploadIconWrap">📄</div>
+        <div class="upload-text">
+          <div class="upload-name" id="uploadName">Drop your resume here</div>
+          <div class="upload-hint" id="uploadHint">PDF or TXT &nbsp;·&nbsp; used across all modules</div>
+        </div>
+        <div class="upload-cta" id="uploadCta">Browse</div>
+      </div>
+      <div class="upload-progress" id="uploadProgress">
+        <div class="upload-progress-bar" id="uploadProgressBar"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════ NAV TABS ══════════════ -->
+  <nav class="nav-wrap">
+    <div class="nav-inner">
+      <button class="nav-tab" onclick="showTab(1)">
+        <span class="nav-num">01</span>
+        <span class="nav-icon">🔍</span>
+        <span class="nav-label">Resume Analysis</span>
+      </button>
+      <button class="nav-tab" onclick="showTab(2)">
+        <span class="nav-num">02</span>
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">Resume Q&amp;A</span>
+      </button>
+      <button class="nav-tab" onclick="showTab(3)">
+        <span class="nav-num">03</span>
+        <span class="nav-icon">🎯</span>
+        <span class="nav-label">Interview Prep</span>
+      </button>
+      <button class="nav-tab" onclick="showTab(4)">
+        <span class="nav-num">04</span>
+        <span class="nav-icon">✨</span>
+        <span class="nav-label">Improvement</span>
+      </button>
+      <button class="nav-tab" onclick="showTab(5)">
+        <span class="nav-num">05</span>
+        <span class="nav-icon">🚀</span>
+        <span class="nav-label">Generate Resume</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ══════════════ PANEL ══════════════ -->
+  <main class="panel">
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <div class="e-icon">⚡</div>
+      <h3>Select a module to begin</h3>
+      <p>Upload your resume above, then choose any tool from the navigation</p>
+    </div>
+
+    <!-- ─── SECTION 1: Resume Analysis ─── -->
+    <div class="section" id="sec1">
+      <div class="sec-head">
+        <div class="sec-num">01</div>
+        <div class="sec-head-text">
+          <div class="sec-title">Resume Analysis</div>
+          <div class="sec-desc">Score your resume against a target role. Uses RAG to retrieve the most relevant experience, then Gemini evaluates against your JD. Cutoff score: <strong style="color:var(--gold)">75 / 100</strong></div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label">Target Role</label>
+          <input type="text" id="role1" placeholder="e.g. Senior Backend Engineer"/>
+        </div>
+
+        <div>
+          <div class="check-row" id="jdCheckRow" onclick="toggleJd()">
+            <div class="check-box" id="jdCheckBox"></div>
+            <div class="check-label">Include Job Description for deeper evaluation</div>
+            <input type="checkbox" id="jdCheck" hidden/>
+          </div>
+          <div class="field jd-field" id="jdField">
+            <textarea id="jd1" placeholder="Paste the job description here…"></textarea>
+          </div>
+        </div>
+
+        <button class="btn-run" id="btn1" onclick="analyzeResume()">Run Analysis</button>
+
+        <div class="loader-wrap" id="load1">
+          <div class="loader-bars">
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+          </div>
+          <div class="loader-text">Retrieving context &amp; scoring<span>_</span></div>
+        </div>
+
+        <div class="result-area" id="analysisResult"></div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 2: Q&A ─── -->
+    <div class="section" id="sec2">
+      <div class="sec-head">
+        <div class="sec-num">02</div>
+        <div class="sec-head-text">
+          <div class="sec-title">Resume Q&amp;A</div>
+          <div class="sec-desc">Ask anything about your resume. The RAG engine retrieves the most relevant sections and Gemini answers precisely — no hallucinations about unrelated experience.</div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label">Your Question</label>
+          <textarea id="qaQuestion" placeholder="e.g. What are my strongest technical skills? Which companies have I worked at? What is my highest qualification?"></textarea>
+        </div>
+
+        <button class="btn-run" id="btn2" onclick="askQA()">Get Answer</button>
+
+        <div class="loader-wrap" id="load2">
+          <div class="loader-bars">
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+          </div>
+          <div class="loader-text">Searching resume context<span>_</span></div>
+        </div>
+
+        <div class="result-area" id="qaResult"></div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 3: Interview Questions ─── -->
+    <div class="section" id="sec3">
+      <div class="sec-head">
+        <div class="sec-num">03</div>
+        <div class="sec-head-text">
+          <div class="sec-title">Interview Prep</div>
+          <div class="sec-desc">Generate personalised interview questions drawn directly from your experience — not generic ones. Configure type, difficulty, and quantity.</div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-row2">
+          <div class="field">
+            <label class="field-label">Question Type</label>
+            <select id="qType">
+              <option>Technical</option>
+              <option>Behavioral</option>
+              <option>Managerial</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Difficulty Level</label>
+            <select id="qLevel">
+              <option>Easy</option>
+              <option selected>Medium</option>
+              <option>Hard</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Target Role (optional)</label>
+          <input type="text" id="role3" placeholder="e.g. Engineering Manager"/>
+        </div>
+
+        <div class="slider-wrap">
+          <div class="slider-top">
+            <span class="slider-label">Number of Questions</span>
+            <div>
+              <span class="slider-count" id="qCountVal">5</span>
+              <span class="slider-unit">questions</span>
+            </div>
+          </div>
+          <input type="range" id="qCount" min="1" max="15" value="5"
+            oninput="document.getElementById('qCountVal').textContent=this.value"/>
+          <div class="slider-track-labels"><span>1</span><span>5</span><span>10</span><span>15</span></div>
+        </div>
+
+        <button class="btn-run" id="btn3" onclick="generateQuestions()">Generate Questions</button>
+
+        <div class="loader-wrap" id="load3">
+          <div class="loader-bars">
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+          </div>
+          <div class="loader-text">Crafting personalised questions<span>_</span></div>
+        </div>
+
+        <div class="result-area" id="questionsResult"></div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 4: Improvement ─── -->
+    <div class="section" id="sec4">
+      <div class="sec-head">
+        <div class="sec-num">04</div>
+        <div class="sec-head-text">
+          <div class="sec-title">Resume Improvement</div>
+          <div class="sec-desc">Choose a specific area and receive expert coaching grounded in your actual resume content — with before/after rewrites and concrete action steps.</div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label">Area for Improvement</label>
+          <select id="improvArea">
+            <option value="">— Select an area —</option>
+            <option>Work Experience Descriptions</option>
+            <option>Skills Section</option>
+            <option>Summary / Objective</option>
+            <option>Education Section</option>
+            <option>ATS Optimization</option>
+            <option>Overall Structure &amp; Formatting</option>
+            <option>Quantifiable Achievements</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Target Role</label>
+          <input type="text" id="improvRole" placeholder="e.g. Data Scientist at a Series B startup"/>
+        </div>
+
+        <button class="btn-run" id="btn4" onclick="improveResume()">Get Improvement Tips</button>
+
+        <div class="loader-wrap" id="load4">
+          <div class="loader-bars">
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+          </div>
+          <div class="loader-text">Analysing and coaching<span>_</span></div>
+        </div>
+
+        <div class="result-area" id="improvResult"></div>
+      </div>
+    </div>
+
+    <!-- ─── SECTION 5: Generate Resume ─── -->
+    <div class="section" id="sec5">
+      <div class="sec-head">
+        <div class="sec-num">05</div>
+        <div class="sec-head-text">
+          <div class="sec-title">Generate Resume</div>
+          <div class="sec-desc">Create a polished, ATS-optimised resume from scratch or by enhancing your existing one — tailored specifically to the role and job description.</div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label">Target Role</label>
+          <input type="text" id="genRole" placeholder="e.g. Lead Machine Learning Engineer"/>
+        </div>
+
+        <div class="field">
+          <label class="field-label">Job Description</label>
+          <textarea id="genJd" placeholder="Paste the full job description here to maximise relevance…" style="min-height:130px"></textarea>
+        </div>
+
+        <div class="info-tip">
+          <span class="info-tip-icon">💡</span>
+          <span>If you've uploaded a resume, your real experience will be used as the foundation — not fabricated details.</span>
+        </div>
+
+        <button class="btn-run" id="btn5" onclick="generateResume()">Generate Resume</button>
+
+        <div class="loader-wrap" id="load5">
+          <div class="loader-bars">
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div><div class="loader-bar"></div>
+            <div class="loader-bar"></div>
+          </div>
+          <div class="loader-text">Composing your resume<span>_</span></div>
+        </div>
+
+        <div class="result-area" id="genResult"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <p>RecruitAI &nbsp;·&nbsp; <span>Gemini 1.5 Flash</span> &nbsp;+&nbsp; <span>Sentence Transformers</span> &nbsp;+&nbsp; <span>ChromaDB</span></p>
+  </footer>
+
+</div><!-- /page-wrap -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   BACKGROUND CANVAS — floating particles
+═══════════════════════════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function makeParticle() {
+    return {
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.5 + 0.3,
+      c:  Math.floor(Math.random() * 3),
+      vx: (Math.random() - 0.5) * 0.15,
+      vy: (Math.random() - 0.5) * 0.15,
+      a:  Math.random()
+    };
+  }
+
+  function init() {
+    resize();
+    particles = Array.from({ length: 80 }, makeParticle);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.a += 0.005;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      const alpha = (Math.sin(p.a) * 0.5 + 0.5) * 0.6;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.c === 0 ? `rgba(0,212,255,${alpha})` : p.c === 1 ? `rgba(168,85,247,${alpha})` : `rgba(236,72,153,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  init(); draw();
+})();
+
+/* ═══════════════════════════════════════════════════════════════
+   APP STATE
+═══════════════════════════════════════════════════════════════ */
+let resumeText  = '';
+let resumeId    = '';
+let resumeFile  = '';
+let currentTab  = null;
+
+/* ═══════════════════════════════════════════════════════════════
+   FILE UPLOAD
+═══════════════════════════════════════════════════════════════ */
+async function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Show progress bar
+  const prog = document.getElementById('uploadProgress');
+  const bar  = document.getElementById('uploadProgressBar');
+  prog.classList.add('active');
+  let pct = 0;
+  const tick = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 15, 85);
+    bar.style.width = pct + '%';
+  }, 120);
+
+  // Update UI to uploading state
+  document.getElementById('uploadName').textContent = 'Processing & embedding…';
+  document.getElementById('uploadHint').textContent = 'Uploading to server · building vector index…';
+  document.getElementById('uploadCta').style.display = 'none';
+
+  try {
+    // Send file to Flask /api/upload — this extracts text, embeds, stores in ChromaDB
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res  = await fetch('/api/upload', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    clearInterval(tick);
+    bar.style.width = '100%';
+    setTimeout(() => { prog.classList.remove('active'); bar.style.width = '0%'; }, 500);
+
+    if (data.error) {
+      toast('Upload failed: ' + data.error);
+      document.getElementById('uploadName').textContent = 'Upload failed — try again';
+      document.getElementById('uploadCta').style.display = '';
+      return;
+    }
+
+    // Cache resume text and metadata globally
+    resumeText  = data.resume_text;
+    resumeId    = data.resume_id;
+    resumeFile  = data.file_name;
+
+    document.getElementById('uploadIconWrap').textContent = '✅';
+    const nameEl = document.getElementById('uploadName');
+    nameEl.textContent = file.name;
+    nameEl.style.color = 'var(--green)';
+    document.getElementById('uploadHint').textContent =
+      'Embedded & ready · ' + (data.message || 'all modules can now use this resume');
+    document.getElementById('uploadBox').classList.add('loaded');
+
+  } catch (err) {
+    clearInterval(tick);
+    prog.classList.remove('active');
+    toast('Upload error: ' + err.message);
+    document.getElementById('uploadName').textContent = 'Upload failed — try again';
+    document.getElementById('uploadCta').style.display = '';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TAB NAVIGATION
+═══════════════════════════════════════════════════════════════ */
+function showTab(n) {
+  const tabs     = document.querySelectorAll('.nav-tab');
+  const sections = document.querySelectorAll('.section');
+  const empty    = document.getElementById('emptyState');
+
+  if (currentTab === n) {
+    tabs[n-1].classList.remove('active');
+    sections.forEach(s => s.classList.remove('active'));
+    empty.style.display = 'block';
+    currentTab = null;
+    return;
+  }
+
+  tabs.forEach(t => t.classList.remove('active'));
+  sections.forEach(s => s.classList.remove('active'));
+  tabs[n-1].classList.add('active');
+  document.getElementById('sec' + n).classList.add('active');
+  empty.style.display = 'none';
+  currentTab = n;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHECKBOX TOGGLE
+═══════════════════════════════════════════════════════════════ */
+function toggleJd() {
+  const row   = document.getElementById('jdCheckRow');
+  const box   = document.getElementById('jdCheckBox');
+  const cb    = document.getElementById('jdCheck');
+  const field = document.getElementById('jdField');
+  const checked = !cb.checked;
+  cb.checked = checked;
+  row.classList.toggle('checked', checked);
+  field.classList.toggle('visible', checked);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════════ */
+// Original button labels — saved once, never lost
+const BTN_LABELS = {
+  1: 'Run Analysis',
+  2: 'Get Answer',
+  3: 'Generate Questions',
+  4: 'Get Improvement Tips',
+  5: 'Generate Resume'
+};
+
+function setLoading(n, on) {
+  const loader = document.getElementById('load' + n);
+  const btn    = document.getElementById('btn' + n);
+  loader.classList.toggle('active', on);
+  btn.disabled    = on;
+  btn.textContent = on ? 'Processing…' : BTN_LABELS[n];
+}
+
+async function post(url, body) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+
+function resultText(text) {
+  return `<div class="result-text">${esc(text)}</div>`;
+}
+
+function errorBox(msg) {
+  return `<div class="result-error">⚠ ${esc(msg)}</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 1 — RESUME ANALYSIS
+═══════════════════════════════════════════════════════════════ */
+async function analyzeResume() {
+  if (!resumeText) return toast('Please upload a resume first.');
+  const role = document.getElementById('role1').value.trim();
+  if (!role) return toast('Please enter a target role.');
+
+  setLoading(1, true);
+  document.getElementById('analysisResult').innerHTML = '';
+
+  const data = await post('/api/analyze', {
+    resume: resumeText, file_name: resumeFile,
+    role,
+    jd: document.getElementById('jdCheck').checked ? document.getElementById('jd1').value : ''
+  });
+
+  setLoading(1, false);
+
+  if (data.error) {
+    document.getElementById('analysisResult').innerHTML = errorBox(data.error);
+    return;
+  }
+
+  const score  = data.score || 0;
+  const isPass = score >= 75;
+  const color  = isPass ? 'var(--green)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
+  const r = 52, circ = 2 * Math.PI * r;
+  const offset = circ - (score / 100) * circ;
+
+  const strengthsHtml = (data.strengths || []).map(s =>
+    `<div class="insight-item">${esc(s)}</div>`).join('');
+  const gapsHtml = (data.gaps || []).map(g =>
+    `<div class="insight-item">${esc(g)}</div>`).join('');
+
+  const verdictTitle = isPass ? 'Qualified Candidate' : 'Below Threshold';
+  const verdictSub   = isPass
+    ? `Score of ${score}/100 exceeds the 75-point cutoff.`
+    : `Score of ${score}/100 is below the required 75-point cutoff.`;
+
+  document.getElementById('analysisResult').innerHTML = `
+    <div class="score-display ${isPass ? 'pass' : 'fail'}">
+      <div class="score-ring-wrap">
+        <svg class="score-svg" width="120" height="120" viewBox="0 0 120 120">
+          <circle class="score-ring-bg" cx="60" cy="60" r="${r}"/>
+          <circle class="score-ring-fill" cx="60" cy="60" r="${r}"
+            stroke="${color}"
+            stroke-dasharray="${circ}"
+            stroke-dashoffset="${circ}"
+            id="scoreRing"/>
+        </svg>
+        <div class="score-inner">
+          <div class="score-num" style="color:${color}">${score}</div>
+          <div class="score-denom">/ 100</div>
+        </div>
+      </div>
+      <div class="score-verdict">
+        <div class="score-verdict-label">Evaluation Result</div>
+        <div class="score-verdict-msg">${verdictTitle}</div>
+        <div class="score-verdict-sub">${verdictSub}</div>
+      </div>
+    </div>
+
+    <div class="insight-grid">
+      <div class="insight-card strengths">
+        <div class="insight-card-head">
+          <div class="insight-card-dot"></div>
+          <div class="insight-card-title">Strengths</div>
+        </div>
+        ${strengthsHtml || '<div class="insight-item" style="color:var(--text3)">None identified</div>'}
+      </div>
+      <div class="insight-card gaps">
+        <div class="insight-card-head">
+          <div class="insight-card-dot"></div>
+          <div class="insight-card-title">Gaps</div>
+        </div>
+        ${gapsHtml || '<div class="insight-item" style="color:var(--text3)">None identified</div>'}
+      </div>
+    </div>
+
+    ${data.overall_summary ? `<div class="result-box">${esc(data.overall_summary)}</div>` : ''}
+  `;
+
+  // Animate score ring
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const ring = document.getElementById('scoreRing');
+      if (ring) ring.style.strokeDashoffset = offset;
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 2 — Q&A
+═══════════════════════════════════════════════════════════════ */
+async function askQA() {
+  if (!resumeText) return toast('Please upload a resume first.');
+  const question = document.getElementById('qaQuestion').value.trim();
+  if (!question) return toast('Please enter a question.');
+
+  setLoading(2, true);
+  document.getElementById('qaResult').innerHTML = '';
+  const data = await post('/api/qa', { resume: resumeText, file_name: resumeFile, question });
+  setLoading(2, false);
+
+  document.getElementById('qaResult').innerHTML = data.error
+    ? errorBox(data.error)
+    : resultText(data.answer || '');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 3 — INTERVIEW QUESTIONS
+═══════════════════════════════════════════════════════════════ */
+async function generateQuestions() {
+  if (!resumeText) return toast('Please upload a resume first.');
+
+  setLoading(3, true);
+  document.getElementById('questionsResult').innerHTML = '';
+
+  const data = await post('/api/questions', {
+    resume: resumeText, file_name: resumeFile,
+    type:   document.getElementById('qType').value,
+    level:  document.getElementById('qLevel').value,
+    count:  parseInt(document.getElementById('qCount').value),
+    role:   document.getElementById('role3').value
+  });
+
+  setLoading(3, false);
+  document.getElementById('questionsResult').innerHTML = data.error
+    ? errorBox(data.error)
+    : resultText(data.questions || '');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 4 — IMPROVEMENT
+═══════════════════════════════════════════════════════════════ */
+async function improveResume() {
+  if (!resumeText) return toast('Please upload a resume first.');
+
+  setLoading(4, true);
+  document.getElementById('improvResult').innerHTML = '';
+
+  const data = await post('/api/improve', {
+    resume: resumeText, file_name: resumeFile,
+    area:   document.getElementById('improvArea').value,
+    role:   document.getElementById('improvRole').value
+  });
+
+  setLoading(4, false);
+  document.getElementById('improvResult').innerHTML = data.error
+    ? errorBox(data.error)
+    : resultText(data.suggestions || '');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 5 — GENERATE RESUME
+═══════════════════════════════════════════════════════════════ */
+async function generateResume() {
+  const role = document.getElementById('genRole').value.trim();
+  if (!role) return toast('Please enter a target role.');
+
+  setLoading(5, true);
+  document.getElementById('genResult').innerHTML = '';
+
+  const data = await post('/api/generate', {
+    resume: resumeText, file_name: resumeFile,
+    role,
+    jd: document.getElementById('genJd').value
+  });
+
+  setLoading(5, false);
+
+  if (data.resume) {
+    window._generatedResume = data.resume;
+    document.getElementById('genResult').innerHTML = `
+      ${resultText(data.resume)}
+      <button class="btn-copy" onclick="copyResume(this)">
+        <span>📋</span> Copy to Clipboard
+      </button>
+    `;
+  } else {
+    document.getElementById('genResult').innerHTML = errorBox(data.error || 'Generation failed. Please retry.');
+  }
+}
+
+function copyResume(btn) {
+  navigator.clipboard.writeText(window._generatedResume || '').then(() => {
+    btn.innerHTML = '<span>✅</span> Copied!';
+    btn.style.borderColor = 'var(--green)';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => {
+      btn.innerHTML = '<span>📋</span> Copy to Clipboard';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2500);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATION
+═══════════════════════════════════════════════════════════════ */
+function toast(msg) {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    Object.assign(t.style, {
+      position:'fixed', bottom:'28px', left:'50%', transform:'translateX(-50%) translateY(20px)',
+      background:'rgba(8,13,26,0.95)', border:'1px solid rgba(0,212,255,0.25)',
+      backdropFilter:'blur(16px)', color:'#e8f4fd',
+      padding:'12px 24px', borderRadius:'8px', fontSize:'13px',
+      fontFamily:"'JetBrains Mono', monospace", letterSpacing:'0.5px',
+      zIndex:'9999', transition:'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+      opacity:'0', pointerEvents:'none', whiteSpace:'nowrap'
+    });
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3000);
+}
+</script>
+</body>
+</html>
