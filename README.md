@@ -36,7 +36,6 @@ embed_documents()           Sentence Transformers (local CPU/GPU)
 ChromaDB store              Saved to ./chroma_db/ (permanent)
 
 ─────────────────────────────────────────────────────
-
 User Query (any section)
     │
     ▼
