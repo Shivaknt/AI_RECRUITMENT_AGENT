@@ -1,6 +1,6 @@
 # RecruitAI — Intelligent Hiring Suite
 
-> AI-powered resume analysis, Q&A, interview prep, improvement coaching, and resume generation — built on **Gemini 1.5 Flash** with a clean Flask backend.
+> AI-powered resume analysis, Q&A, interview prep, improvement coaching, and resume generation — built on **Gemini 2.5 Flash** with a clean Flask backend.
 
 ---
 
@@ -21,7 +21,7 @@
 ```
 Frontend   →  Vanilla HTML + CSS + JS  (no framework)
 Backend    →  Flask (Python)
-LLM        →  Gemini 1.5 Flash via google-genai SDK
+LLM        →  Gemini 2.5 Flash via google-genai SDK
 PDF Parse  →  PyPDF2
 Container  →  Docker
 ```
