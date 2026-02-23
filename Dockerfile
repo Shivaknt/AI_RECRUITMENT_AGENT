@@ -21,7 +21,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 COPY resume_rag.py .
 COPY templates/ templates/
-COPY static/ static/
 
 # Create a non-root user for security
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
