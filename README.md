@@ -1,55 +1,33 @@
-# AI Recruitment Agent 🤖
-### RAG Pipeline · Gemini LLM · Sentence Transformers · ChromaDB
+# RecruitAI — Intelligent Hiring Suite
+
+> AI-powered resume analysis, Q&A, interview prep, improvement coaching, and resume generation — built on **Gemini 1.5 Flash** with a clean Flask backend.
 
 ---
 
-## Stack
+## What It Does
 
-| Layer | Tool | Cost |
-|---|---|---|
-| LLM | Gemini 2.5 Flash | Free tier (generous) |
-| Embeddings | Sentence Transformers `all-MiniLM-L6-v2` | **100% Free** (runs locally) |
-| Vector DB | ChromaDB | **100% Free** (local folder) |
-| PDF Extract | PyPDF2 | **100% Free** |
-
+| Module | Description |
+|--------|-------------|
+| 🔍 **Resume Analysis** | Scores resume 0–100 against a role/JD. Extracts strengths and gaps. Cutoff: 75/100 |
+| 💬 **Resume Q&A** | Ask anything about the resume — Gemini answers from the full text |
+| 🎯 **Interview Prep** | Generates personalised questions by type (Technical/Behavioral/Managerial), difficulty, and count |
+| ✨ **Improvement Tips** | Area-specific coaching with before/after rewrites |
+| 🚀 **Generate Resume** | Produces a polished ATS-optimised resume tailored to the role and JD |
 
 ---
 
-## Architecture
+## Tech Stack
 
 ```
-PDF / TXT Upload
-    │
-    ▼
-extract_text()              PyPDF2 or plain read
-    │
-    ▼
-chunk_text()                400-char chunks, 80-char overlap
-    │
-    ▼
-MD5 hash check ─────────── Already in ChromaDB? → SKIP (free)
-    │  (cache miss)
-    ▼
-embed_documents()           Sentence Transformers (local CPU/GPU)
-    │                       model: all-MiniLM-L6-v2, 384-dim
-    ▼
-ChromaDB store              Saved to ./chroma_db/ (permanent)
-
-─────────────────────────────────────────────────────
-User Query (any section)
-    │
-    ▼
-embed_query()               Same ST model (local, instant)
-    │
-    ▼
-retrieve_chunks()           Top-5 cosine similar chunks
-    │
-    ▼
-_call_gemini()              Gemini 1.5 Flash with context
-    │
-    ▼
-Response to user
+Frontend   →  Vanilla HTML + CSS + JS  (no framework)
+Backend    →  Flask (Python)
+LLM        →  Gemini 1.5 Flash via google-genai SDK
+PDF Parse  →  PyPDF2
+Container  →  Docker
 ```
+
+No vector database. No embeddings. No ChromaDB.
+A resume is ~1500 tokens — Gemini's 1M token context handles it directly.
 
 ---
 
@@ -57,57 +35,49 @@ Response to user
 
 ```
 recruitment-agent/
-├── app.py                  Flask routes
-├── resume_rag.py           Full RAG pipeline  ← main file
-├── requirements.txt
-├── .env                    Gemini API key only
-├── chroma_db/              Auto-created vector store
+├── app.py              ← Flask routes (5 API endpoints + upload)
+├── resume_rag.py       ← Text extraction + Gemini calls
+├── requirements.txt    ← 4 dependencies only
+├── Dockerfile          ← Production container
+├── .dockerignore       ← Docker build exclusions
+├── .env                ← Your API key (never commit this)
 └── templates/
-    └── index.html          Frontend
+    └── index.html      ← Full frontend (single file)
 ```
 
 ---
 
-## Setup
+## Quick Start (Local)
 
-### 1. Get Gemini API key (free)
-https://aistudio.google.com/app/apikey
+### 1. Get a Gemini API Key
 
-### 2. Set .env
+Free tier at → [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+
+Generous free limits: 15 requests/min · 1M tokens/day
+
+### 2. Clone and configure
+
+```bash
+git clone <your-repo>
+cd recruitment-agent
+
+# Create your .env file
+echo "GEMINI_API_KEY=AIza...your_key_here" > .env
 ```
-GEMINI_API_KEY=AIza...your_key_here
-```
 
-### 3. Install
+### 3. Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
-> First run downloads the ST model (~80MB) once.
-> Cached at `~/.cache/huggingface/` — never downloaded again.
 
 ### 4. Run
+
 ```bash
 python app.py
-# → http://localhost:5000
 ```
+
+Open → [http://localhost:5000](http://localhost:5000)
 
 ---
 
-## Test the pipeline from terminal
-
-```bash
-# Analyze a resume
-python resume_rag.py path/to/resume.pdf "Data Scientist"
-
-# List all stored resumes
-python resume_rag.py
-```
-
----
-
-## Key behaviour
-
-- **Same resume uploaded twice** → ChromaDB already has it → zero embedding cost
-- **Embedding model** downloads once, then runs fully offline forever
-- **chroma_db/** persists between server restarts — no data loss
-- **All 5 app sections** share the same stored embeddings — no duplication

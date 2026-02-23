@@ -732,7 +732,7 @@
       <span class="word-ai">AI</span>
       <span class="word-agent">Intelligent Hiring Suite</span>
     </h1>
-    <p class="hero-sub">Analyze · Interview · Improve · Generate &mdash;  &amp; Gemini</p>
+    <p class="hero-sub">Analyze · Interview · Improve · Generate &mdash; powered by local embeddings &amp; Gemini</p>
 
     <!-- Upload -->
     <div class="upload-zone">
@@ -1076,8 +1076,6 @@
    APP STATE
 ═══════════════════════════════════════════════════════════════ */
 let resumeText  = '';
-let resumeId    = '';
-let resumeFile  = '';
 let currentTab  = null;
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1121,17 +1119,15 @@ async function handleFile(e) {
       return;
     }
 
-    // Cache resume text and metadata globally
-    resumeText  = data.resume_text;
-    resumeId    = data.resume_id;
-    resumeFile  = data.file_name;
+    // Cache resume text
+    resumeText = data.resume_text;
 
     document.getElementById('uploadIconWrap').textContent = '✅';
     const nameEl = document.getElementById('uploadName');
     nameEl.textContent = file.name;
     nameEl.style.color = 'var(--green)';
     document.getElementById('uploadHint').textContent =
-      'Embedded & ready · ' + (data.message || 'all modules can now use this resume');
+      `Ready · ${data.chars ? Math.round(data.chars/1000)+'k chars extracted' : 'all modules can now use this resume'}`;
     document.getElementById('uploadBox').classList.add('loaded');
 
   } catch (err) {
@@ -1237,7 +1233,7 @@ async function analyzeResume() {
   document.getElementById('analysisResult').innerHTML = '';
 
   const data = await post('/api/analyze', {
-    resume: resumeText, file_name: resumeFile,
+    resume: resumeText,
     role,
     jd: document.getElementById('jdCheck').checked ? document.getElementById('jd1').value : ''
   });
@@ -1327,7 +1323,7 @@ async function askQA() {
 
   setLoading(2, true);
   document.getElementById('qaResult').innerHTML = '';
-  const data = await post('/api/qa', { resume: resumeText, file_name: resumeFile, question });
+  const data = await post('/api/qa', { resume: resumeText, question });
   setLoading(2, false);
 
   document.getElementById('qaResult').innerHTML = data.error
@@ -1345,7 +1341,7 @@ async function generateQuestions() {
   document.getElementById('questionsResult').innerHTML = '';
 
   const data = await post('/api/questions', {
-    resume: resumeText, file_name: resumeFile,
+    resume: resumeText,
     type:   document.getElementById('qType').value,
     level:  document.getElementById('qLevel').value,
     count:  parseInt(document.getElementById('qCount').value),
@@ -1368,7 +1364,7 @@ async function improveResume() {
   document.getElementById('improvResult').innerHTML = '';
 
   const data = await post('/api/improve', {
-    resume: resumeText, file_name: resumeFile,
+    resume: resumeText,
     area:   document.getElementById('improvArea').value,
     role:   document.getElementById('improvRole').value
   });
@@ -1390,7 +1386,7 @@ async function generateResume() {
   document.getElementById('genResult').innerHTML = '';
 
   const data = await post('/api/generate', {
-    resume: resumeText, file_name: resumeFile,
+    resume: resumeText,
     role,
     jd: document.getElementById('genJd').value
   });

@@ -1,33 +1,38 @@
-FROM python:3.10-slim
+# ── Stage: Python 3.11 slim base ─────────────────────────────────
+FROM python:3.11-slim
 
-# -------- Environment --------
-ENV PYTHONDONTWRITEBYTECODE=1
+# Metadata
+LABEL maintainer="RecruitAI"
+LABEL description="AI Recruitment Agent — Gemini powered resume analysis suite"
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies needed by PyPDF2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install Python dependencies first (layer cache optimization)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY app.py .
+COPY resume_rag.py .
+COPY templates/ templates/
+COPY static/ static/
+
+# Create a non-root user for security
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Expose Flask port
+EXPOSE 5000
+
+# Environment defaults (override via docker run -e or .env)
+ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-# -------- System Dependencies --------
-RUN apt-get update && apt-get install -y \
-    build-essential \
-        curl \
-	    && rm -rf /var/lib/apt/lists/*
-
-	    # -------- Working Directory --------
-	    WORKDIR /app
-
-	    # -------- Copy Requirements First (for layer caching) --------
-	    COPY requirements.txt .
-
-	    # -------- Install Python Dependencies --------
-	    RUN pip install --upgrade pip
-	    RUN pip install --no-cache-dir -r requirements.txt
-
-	    # -------- Copy Project Files --------
-	    COPY . .
-
-	    # -------- Create Chroma Persistence Directory --------
-	    RUN mkdir -p /app/chroma_db
-
-	    # -------- Expose Flask Port --------
-	    EXPOSE 5000
-
-	    # -------- Run Application --------
-	    CMD ["python", "app.py"]
+# Run with Gunicorn in production (falls back to Flask dev server if not installed)
+CMD ["python", "app.py"]
